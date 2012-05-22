@@ -1,0 +1,12 @@
+{application, vm_statistic,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { vm_statistic_app, []}},
+  {env, []}
+ ]}.
