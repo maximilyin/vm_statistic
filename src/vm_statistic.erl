@@ -2,7 +2,7 @@
 -behavior(gen_server).
 -export([start_app/0, start_statistic/0, start/0]).
 -export([init/1, handle_call/3, handle_cast/2,handle_info/2, terminate/2, code_change/3]).
--export([context_switches_vm/0, ports_vm/0, process_count_vm/0, process_limit_vm/0, memory_vm/0]).
+-export([date_interval/2, context_switches_vm/0, ports_vm/0, process_count_vm/0, process_limit_vm/0, memory_vm/0]).
 
 start() -> 
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -12,7 +12,7 @@ init([]) ->
 
 start_app() ->
     io:format("Statitics generator started~n"),
-    timer:apply_interval(5000, vm_statistic, start_statistic, []).
+    timer:apply_interval(5000, ?MODULE, start_statistic, []).
 
 start_statistic() ->
     Memory = {vm_statistic:memory_vm()}, 
@@ -21,15 +21,13 @@ start_statistic() ->
     Ports = {vm_statistic:ports_vm()},
     Context_Switches = {vm_statistic:context_switches_vm()},
     Date_Second = calendar:datetime_to_gregorian_seconds(calendar:local_time()),
-    dets:insert(?MODULE, {Date_Second, Memory, Process_Count, Process_Limit, Ports, Context_Switches}),
+    dets:insert(?MODULE, {Date_Second, Memory, Process_Count, Process_Limit, Ports, Context_Switches}).
+
+date_interval(Min, Max) ->
     dets:select(?MODULE,
-        [{{'$1', '$2'},
-            [],
+        [{{'$1', '_', '_', '_', '_', '_'},
+            [{'<=', '$1', '$1'}, {'=>', '$1', '$1'}],
                 ['$$']}]).
-
-
-
-   % io:format("Statistic~p~n", [{Date_Second, Memory, Process_Count, Process_Limit, Ports, Context_Switches}]).
 
 memory_vm() ->
     gen_server:call(?MODULE, {memory}).
